@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Kubernetes Deployment
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   build:
@@ -16,29 +16,28 @@ jobs:
       run: |
         docker build -t my-web-app:latest .
 
-    - name: Save Docker image
+    - name: Save Docker image locally
       run: |
-        docker save my-web-app:latest > my-web-app.tar
-
-    - name: Upload Docker image
-      uses: actions/upload-artifact@v3
-      with:
-        name: my-web-app
-        path: my-web-app.tar
+        mkdir -p temp-docker-image
+        docker save my-web-app:latest > temp-docker-image/my-web-app.tar
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - name: Download Docker image
-      uses: actions/download-artifact@v3
-      with:
-        name: my-web-app
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup MicroK8s
+      run: |
+        sudo snap install microk8s --classic
+        microk8s enable dns ingress
 
     - name: Load Docker image
       run: |
-        docker load < my-web-app.tar
+        docker load < temp-docker-image/my-web-app.tar
 
     - name: Deploy to Kubernetes
       run: |
         microk8s kubectl apply -f deployment.yaml
+
