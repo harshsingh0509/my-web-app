@@ -32,10 +32,10 @@ jobs:
       run: |
         sudo snap install microk8s --classic
         sudo usermod -a -G microk8s $USER
-        sudo chown -R $USER ~/.kube
-        sudo chmod 770 /var/snap/microk8s/current/args
-        sudo chmod 770 /var/snap/microk8s/current/certs
-        sudo chmod 770 /var/snap/microk8s/current/credentials
+        sudo mkdir -p /home/runner/.kube
+        sudo chown -R $USER /home/runner/.kube
+        sudo chmod -R 770 /var/snap/microk8s/current
+        sudo microk8s status --wait-ready
 
     - name: Enable DNS and Ingress
       run: |
