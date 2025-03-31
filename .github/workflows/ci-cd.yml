@@ -28,17 +28,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install MicroK8s
+    - name: Install and Configure MicroK8s
       run: |
         sudo snap install microk8s --classic
         sudo usermod -a -G microk8s $USER
-        mkdir -p ~/.kube
         sudo chown -R $USER ~/.kube
-        newgrp microk8s
+        sudo chmod 770 /var/snap/microk8s/current/args
+        sudo chmod 770 /var/snap/microk8s/current/certs
+        sudo chmod 770 /var/snap/microk8s/current/credentials
 
     - name: Enable DNS and Ingress
       run: |
-        microk8s enable dns ingress
+        sudo microk8s enable dns ingress
 
     - name: Load Docker image
       run: |
@@ -46,5 +47,5 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        microk8s kubectl apply -f deployment.yaml
+        sudo microk8s kubectl apply -f deployment.yaml
 
