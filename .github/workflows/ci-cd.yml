@@ -28,9 +28,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup MicroK8s
+    - name: Install MicroK8s
       run: |
         sudo snap install microk8s --classic
+        sudo usermod -a -G microk8s $USER
+        sudo chown -R $USER ~/.kube
+        newgrp microk8s
+
+    - name: Enable DNS and Ingress
+      run: |
         microk8s enable dns ingress
 
     - name: Load Docker image
