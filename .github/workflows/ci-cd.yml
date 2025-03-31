@@ -32,6 +32,7 @@ jobs:
       run: |
         sudo snap install microk8s --classic
         sudo usermod -a -G microk8s $USER
+        mkdir -p ~/.kube
         sudo chown -R $USER ~/.kube
         newgrp microk8s
 
