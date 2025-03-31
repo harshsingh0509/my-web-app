@@ -18,14 +18,8 @@ jobs:
 
     - name: Save Docker image locally
       run: |
-        mkdir -p temp-docker-image
-        docker save my-web-app:latest > temp-docker-image/my-web-app.tar
-
-    - name: Upload Docker image artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: docker-image
-        path: temp-docker-image/my-web-app.tar
+        mkdir -p $GITHUB_WORKSPACE/temp-docker-image
+        docker save my-web-app:latest > $GITHUB_WORKSPACE/temp-docker-image/my-web-app.tar
 
   deploy:
     runs-on: ubuntu-latest
@@ -34,10 +28,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Download Docker image artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: docker-image
+    - name: Load Docker image
+      run: |
+        docker load < $GITHUB_WORKSPACE/temp-docker-image/my-web-app.tar
 
     - name: Install and Configure MicroK8s
       run: |
@@ -51,10 +44,6 @@ jobs:
     - name: Enable DNS and Ingress
       run: |
         sudo microk8s enable dns ingress
-
-    - name: Load Docker image
-      run: |
-        docker load < my-web-app.tar
 
     - name: Deploy to Kubernetes
       run: |
